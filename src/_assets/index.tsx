@@ -1,22 +1,44 @@
 import React from "react";
-import ReactDOM from "react-dom";
+import {createRoot} from "react-dom/client";
 
-import "./index.css";//
+import {readCoreData} from "./readCoreData";
+
+import "./index.css";
 
 const element = React.createElement;
 
-class TestComponent extends React.Component {
+interface State {
+    loaded: boolean;
+}
+
+class PlaceholderComponent extends React.Component<{}, State> {
+    constructor(props: {}) {
+        super(props);
+        this.state = {
+            loaded: false,
+        };
+    }
+
+    override async componentDidMount() {
+        await readCoreData();
+        this.setState({loaded: true});
+    }
+
     render() {
+        if (!this.state.loaded) {
+            return "loading...";
+        }
+
         return <div id="hello">
-            <em>woo</em>
+            <em>See the browser console for results.</em>
         </div>;
     }
 }
 
-ReactDOM.render(
+const root = createRoot(document.getElementById("app-mount"));
+root.render(
     <React.StrictMode>
-        <TestComponent />
-    </React.StrictMode>,
-    document.getElementById("app-mount")
+        <PlaceholderComponent />
+    </React.StrictMode>
 );
 
