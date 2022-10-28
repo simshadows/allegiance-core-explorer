@@ -26,8 +26,7 @@ function htmlWebpackPluginCommon(configArgs, mergeIn) {
 const config = (configArgs) => ({
     mode: configArgs.mode,
     entry: {
-        "index": path.resolve(__dirname, "src", "_assets", "index.ts"),
-        "innerpage/index": path.resolve(__dirname, "src", "innerpage", "_assets", "index.ts"),
+        "index": path.resolve(__dirname, "src", "_assets", "index.tsx"),
     },
     output: {
         filename: "[name].js",
@@ -39,18 +38,10 @@ const config = (configArgs) => ({
         // This is done as a hack to get the Typescript tooling to work since you're not allowed
         // to include the ".ts" extension when importing modules within a Typescript file.
         // I would prefer if I just included file extensions explicitly.
-        extensions: [".ts", ".js"],
+        extensions: [".tsx", ".ts", ".js"],
     },
     plugins: [
         new HtmlWebpackPlugin(htmlWebpackPluginCommon(configArgs, {})),
-        new HtmlWebpackPlugin(htmlWebpackPluginCommon(configArgs, {
-            filename: "innerpage/index.html",
-            template: path.resolve(__dirname, "src", "innerpage", "index.html"),
-            chunks: ["innerpage/index"],
-
-            title: "Inner Page",
-            description: "I am an inner page!",
-        })),
         new MiniCssExtractPlugin({
             filename: "[name].css",
         }),
@@ -94,7 +85,7 @@ const config = (configArgs) => ({
                 },
             },
             {
-                test: /\.ts$/i,
+                test: /\.(ts|tsx)$/i,
                 use: {
                     loader: "babel-loader",
                     options: {
