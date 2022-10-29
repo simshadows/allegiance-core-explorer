@@ -4,6 +4,7 @@ import "normalize.css";
 
 import {DebuggingView} from "./components/DebuggingView";
 import {ResearchSimulatorView} from "./components/ResearchSimulatorView";
+import {TechTreeView} from "./components/TechTreeView";
 
 import {
     readCoreData,
@@ -13,7 +14,7 @@ import {
 import "./index.css";
 
 
-type AppView = "debugging" | "research-simulator";
+type AppView = "debugging" | "research-simulator" | "tech-tree";
 
 interface State {
     coreData: null | CoreData;
@@ -25,7 +26,7 @@ class App extends React.Component<{}, State> {
         super(props);
         this.state = {
             coreData: null,
-            view: "research-simulator",
+            view: "tech-tree",
         };
     }
 
@@ -43,8 +44,9 @@ class App extends React.Component<{}, State> {
             <h1>Prototype Allegiance Core Explorer</h1>
             <p><input type="file" onChange={(e) => this._onUpload(e)} /></p>
             <p>
-                <select onChange={(e) => this._onViewChange(e)}>
+                <select value={this.state.view} onChange={(e) => this._onViewChange(e)}>
                     <option value="research-simulator">Research Simulator View</option>
+                    <option value="tech-tree">Tech Tree View</option>
                     <option value="debugging">Debugging View</option>
                 </select>
             </p>
@@ -56,6 +58,8 @@ class App extends React.Component<{}, State> {
                         return <DebuggingView coreData={this.state.coreData} />;
                     case "research-simulator":
                         return <ResearchSimulatorView coreData={this.state.coreData} />;
+                    case "tech-tree":
+                        return <TechTreeView coreData={this.state.coreData} />;
                     default:
                         throw new Error("Unexpected view name.");
                 }
@@ -89,7 +93,7 @@ class App extends React.Component<{}, State> {
 
     private async _onViewChange(e: React.ChangeEvent<HTMLSelectElement>): Promise<void> {
         const newVal: string = e.target.value;
-        if (newVal !== "debugging" && newVal !== "research-simulator") {
+        if (newVal !== "debugging" && newVal !== "research-simulator" && newVal !== "tech-tree") {
             throw new Error("Unexpected view name.");
         }
 

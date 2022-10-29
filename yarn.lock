@@ -2862,6 +2862,8 @@ __metadata:
     copy-webpack-plugin: <10
     css-loader: ^6.7.1
     css-minimizer-webpack-plugin: ^4.2.2
+    echarts: ^5.4.0
+    echarts-for-react: ^3.0.2
     fork-ts-checker-webpack-plugin: ^7.2.13
     html-webpack-plugin: ^5.5.0
     jest: ^29.2.2
@@ -2872,6 +2874,7 @@ __metadata:
     react-test-renderer: ^18.2.0
     terser-webpack-plugin: ^5.3.6
     ts-jest: ^29.0.3
+    tslib: ^2.4.0
     typescript: ^4.8.4
     webpack: ^5.74.0
     webpack-cli: ^4.10.0
@@ -4059,6 +4062,29 @@ __metadata:
     no-case: ^3.0.4
     tslib: ^2.0.3
   checksum: a65e3519414856df0228b9f645332f974f2bf5433370f544a681122eab59e66038fc3349b4be1cdc47152779dac71a5864f1ccda2f745e767c46e9c6543b1169
+  languageName: node
+  linkType: hard
+
+"echarts-for-react@npm:^3.0.2":
+  version: 3.0.2
+  resolution: "echarts-for-react@npm:3.0.2"
+  dependencies:
+    fast-deep-equal: ^3.1.3
+    size-sensor: ^1.0.1
+  peerDependencies:
+    echarts: ^3.0.0 || ^4.0.0 || ^5.0.0
+    react: ^15.0.0 || >=16.0.0
+  checksum: d3b16325befb1294d99f6f089462415be739c1654370945eef2172efd5868596f10e4cd021e0ff65b89a6f9de5e9c331ccf3765d9167ccb12d573f9632b5b7a6
+  languageName: node
+  linkType: hard
+
+"echarts@npm:^5.4.0":
+  version: 5.4.0
+  resolution: "echarts@npm:5.4.0"
+  dependencies:
+    tslib: 2.3.0
+    zrender: 5.4.0
+  checksum: 81fb304e5304f1fd172fb419e178791213d2f2f0335a187a311bbe8888f2053dc4d9cd790135786ae09171185a1fd906453a5c93bf69097fff8c5b254873a322
   languageName: node
   linkType: hard
 
@@ -7657,6 +7683,13 @@ __metadata:
   languageName: node
   linkType: hard
 
+"size-sensor@npm:^1.0.1":
+  version: 1.0.1
+  resolution: "size-sensor@npm:1.0.1"
+  checksum: 8af239ea1acac3f9e1fe1b6cc0436b7cd2105c0eee56cebfdc71ec1b6ec9fcb3065bd4214c59aa6615b58f778ac4732056a8d1e909506dacaef476220f27bec3
+  languageName: node
+  linkType: hard
+
 "slash@npm:^3.0.0":
   version: 3.0.0
   resolution: "slash@npm:3.0.0"
@@ -8141,10 +8174,24 @@ __metadata:
   languageName: node
   linkType: hard
 
+"tslib@npm:2.3.0":
+  version: 2.3.0
+  resolution: "tslib@npm:2.3.0"
+  checksum: 8869694c26e4a7b56d449662fd54a4f9ba872c889d991202c74462bd99f10e61d5bd63199566c4284c0f742277736292a969642cc7b590f98727a7cae9529122
+  languageName: node
+  linkType: hard
+
 "tslib@npm:^2.0.3":
   version: 2.3.1
   resolution: "tslib@npm:2.3.1"
   checksum: de17a98d4614481f7fcb5cd53ffc1aaf8654313be0291e1bfaee4b4bb31a20494b7d218ff2e15017883e8ea9626599b3b0e0229c18383ba9dce89da2adf15cb9
+  languageName: node
+  linkType: hard
+
+"tslib@npm:^2.4.0":
+  version: 2.4.0
+  resolution: "tslib@npm:2.4.0"
+  checksum: 8c4aa6a3c5a754bf76aefc38026134180c053b7bd2f81338cb5e5ebf96fefa0f417bff221592bf801077f5bf990562f6264fecbc42cd3309b33872cb6fc3b113
   languageName: node
   linkType: hard
 
@@ -8635,5 +8682,14 @@ __metadata:
   version: 0.1.0
   resolution: "yocto-queue@npm:0.1.0"
   checksum: f77b3d8d00310def622123df93d4ee654fc6a0096182af8bd60679ddcdfb3474c56c6c7190817c84a2785648cdee9d721c0154eb45698c62176c322fb46fc700
+  languageName: node
+  linkType: hard
+
+"zrender@npm:5.4.0":
+  version: 5.4.0
+  resolution: "zrender@npm:5.4.0"
+  dependencies:
+    tslib: 2.3.0
+  checksum: 913cfd53064a9eaab0a6658bb48c8dddc8bd03f13858a2e6792a698af0c0b3d640e89de28eb4f1668f37d94ef125c24912d1bba904ae8a12ac17292fe0db52d5
   languageName: node
   linkType: hard
