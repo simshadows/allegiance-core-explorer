@@ -1,5 +1,6 @@
 import React from "react";
 import {createRoot} from "react-dom/client";
+import "normalize.css";
 
 import {DebuggingView} from "./components/DebuggingView";
 import {ResearchSimulatorView} from "./components/ResearchSimulatorView";
