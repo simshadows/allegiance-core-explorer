@@ -1,55 +1,15 @@
 import React from "react";
 import {createRoot} from "react-dom/client";
 
+import {DebuggingView} from "./components/DebuggingView";
+
 import {
     readCoreData,
     type CoreData,
-    type CivilizationData,
-    type StationTypeData,
-    type DevelopmentData,
 } from "./readCoreData";
-
-//import {toHumanReadableArrayBuffer} from "./utils";
 
 import "./index.css";
 
-function numSetToHumanReadable(obj: Set<number>) {
-    return Array.from(obj).join(", ");
-}
-
-function renderAttribute(name: string, obj: any) {
-    return <li><span className="attribute-name">{name}:</span> {String(obj)}</li>;
-}
-
-function renderCivilization(data: CivilizationData) {
-    return <li key={data.civID}>{data.name} <b>({data.civID})</b>
-        <ul>
-            {renderAttribute("Base Techs", numSetToHumanReadable(data.baseTechs))}
-        </ul>
-    </li>;
-}
-
-function renderStationType(data: StationTypeData) {
-    return <li key={data.stationTypeID}>{data.name} <b>({data.stationTypeID})</b>
-        <ul>
-            {renderAttribute("Tech Required", numSetToHumanReadable(data.techRequired))}
-            {renderAttribute("Tech Effects", numSetToHumanReadable(data.techEffects))}
-            {renderAttribute("Tech Locals", numSetToHumanReadable(data.localTech))}
-        </ul>
-    </li>;
-}
-
-function renderDevelopment(data: DevelopmentData) {
-    return <li key={data.devID}>{data.name} <b>({data.devID})</b>
-        <ul>
-            {renderAttribute("Group ID", data.groupID)}
-            {renderAttribute("Tech Required", numSetToHumanReadable(data.techRequired))}
-            {renderAttribute("Tech Effects", numSetToHumanReadable(data.techEffects))}
-        </ul>
-    </li>;
-}
-
-/*** ***/
 
 interface State {
     loaded: boolean;
@@ -66,48 +26,46 @@ class PlaceholderComponent extends React.Component<{}, State> {
     }
 
     override async componentDidMount() {
+        const res = await fetch("/ac_07.igc");
+        if (!res.ok) return;
         this.setState({
             loaded: true,
-            coreData: await readCoreData(),
+            coreData: await readCoreData(await res.arrayBuffer()),
         });
+        console.log("Successfully loaded '/ac_07.igc' from the server.");
     }
 
     render() {
-        if (!this.state.loaded) {
-            return "loading...";
-        }
-
-        if (this.state.coreData === null) {
-            throw new Error("Core data not loaded.");
-        }
-
         return <>
             <h1>Prototype Allegiance Core Explorer</h1>
-            <h2>Factions</h2>
-            <ul>
-                {
-                    Array.from(this.state.coreData.civilizations)
-                        .sort(([k1, a], [k2, b]) => a.name.localeCompare(b.name))
-                        .map(([k, v]) => renderCivilization(v))
-                }
-            </ul>
-            <h2>Devels</h2>
-            <ul>
-                {
-                    Array.from(this.state.coreData.developments)
-                        .sort(([k1, a], [k2, b]) => a.name.localeCompare(b.name))
-                        .map(([k, v]) => renderDevelopment(v))
-                }
-            </ul>
-            <h2>Stations</h2>
-            <ul>
-                {
-                    Array.from(this.state.coreData.stationTypes)
-                        .sort(([k1, a], [k2, b]) => a.name.localeCompare(b.name))
-                        .map(([k, v]) => renderStationType(v))
-                }
-            </ul>
+            <input type="file" onChange={(e) => this._onUpload(e)} />
+            {
+                (this.state.coreData)
+                ? <DebuggingView coreData={this.state.coreData} />
+                : "Not loaded"
+            }
         </>;
+    }
+
+    private async _loadCoreFile(buf: ArrayBuffer): Promise<void> {
+        this.setState({
+            loaded: true,
+            coreData: readCoreData(buf),
+        });
+    }
+
+    private async _onUpload(e: React.ChangeEvent<HTMLInputElement>): Promise<void> {
+        console.log(e);
+        const target: HTMLInputElement = e.target;
+
+        if (target.files.length === 0) {
+            return;
+        } else if (target.files.length !== 1) {
+            throw new Error("File upload should never take multiple files.");
+        }
+
+        const buf: ArrayBuffer = await target.files[0].arrayBuffer();
+        await this._loadCoreFile(buf);
     }
 }
 

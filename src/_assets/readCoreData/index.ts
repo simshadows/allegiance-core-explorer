@@ -13,6 +13,11 @@
 
 import {SequentialReader} from "./sequentialReader";
 
+import {
+    type GroupID,
+    groupIdIntToEnum,
+} from "../types";
+
 import c from "./constants";
 
 interface GlobalAttributeSet {
@@ -107,7 +112,7 @@ interface Buyable {
     name:        string;
     description: string;
 
-    groupID: number;
+    groupID: GroupID;
 
     techRequired: TechTreeBitMask;
     techEffects:  TechTreeBitMask;
@@ -123,7 +128,7 @@ function readBuyableData(reader: SequentialReader): Buyable {
         name: reader.readString(c.c_cbName),
         description: reader.readString(c.c_cbDescription),
 
-        groupID: reader.readChar(),
+        groupID: groupIdIntToEnum(reader.readChar()),
 
         techRequired: readTechTreeBitMask(reader),
         techEffects: readTechTreeBitMask(reader),
@@ -365,14 +370,13 @@ export interface CoreData {
     developments:  Map<number, DevelopmentData>;
 }
 
-async function fetchCoreData(): Promise<ArrayBuffer> {
-    const res = await fetch("/ac_07.igc");
-    if (!res.ok) throw "Didn't find 'ac_07.igc'. Please place this file in the 'public' folder.";
-    return await res.arrayBuffer();
-}
+//async function fetchCoreData(): Promise<ArrayBuffer> {
+//    const res = await fetch("/ac_07.igc");
+//    if (!res.ok) throw "Didn't find 'ac_07.igc'. Please place this file in the 'public' folder.";
+//    return await res.arrayBuffer();
+//}
 
-export async function readCoreData(): Promise<CoreData> {
-    const buf = await fetchCoreData();
+export function readCoreData(buf: ArrayBuffer): CoreData {
     const view = new DataView(buf);
 
     const data: CoreData = {
