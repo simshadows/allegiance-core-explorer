@@ -24,6 +24,8 @@ function numSetToHumanReadable(obj: Set<number>) {
 interface ConstructionMenuProps {
     stationTypes: Array<StationTypeData>;
     stationTypesActive: Set<number>; // Station Type IDs
+
+    onStationTypeToggle: (n: number) => void;
 }
 
 function ConstructionMenu(props: ConstructionMenuProps) {
@@ -31,7 +33,11 @@ function ConstructionMenu(props: ConstructionMenuProps) {
         <b>Construction</b>
         {
             props.stationTypes.map((d) =>
-                <div className="research-simulator-view--research-menu--item" key={d.stationTypeID}>
+                <div
+                    className={getResearchMenuItemClass(props.stationTypesActive.has(d.stationTypeID))}
+                    key={d.stationTypeID}
+                    onClick={() => props.onStationTypeToggle(d.stationTypeID)}
+                >
                     {d.name}&nbsp;
                     <span className="research-simulator-view--research-menu--id">({d.stationTypeID})</span>
                 </div>
@@ -47,6 +53,14 @@ interface ResearchMenuProps {
 
     devels: Array<DevelopmentData>;
     develsResearched: Set<number>; // Development IDs
+
+    onToggleDevel: (n: number) => void;
+}
+
+function getResearchMenuItemClass(active: boolean) {
+    let c = "research-simulator-view--research-menu--item";
+    if (active) c += " active";
+    return c;
 }
 
 function ResearchMenu(props: ResearchMenuProps) {
@@ -56,7 +70,11 @@ function ResearchMenu(props: ResearchMenuProps) {
         <b>{props.name}</b>
         {
             devels.map((d) =>
-                <div className="research-simulator-view--research-menu--item" key={d.devID}>
+                <div
+                    className={getResearchMenuItemClass(props.develsResearched.has(d.devID))}
+                    key={d.devID}
+                    onClick={() => props.onToggleDevel(d.devID)}
+                >
                     {d.name}&nbsp;
                     <span className="research-simulator-view--research-menu--id">({d.devID})</span>
                 </div>
@@ -116,6 +134,8 @@ export class ResearchSimulatorView extends React.Component<Props, State> {
                 <ConstructionMenu
                     stationTypes={stationTypes}
                     stationTypesActive={this.state.stationTypesActive}
+
+                    onStationTypeToggle={n => this._onToggleStationType(n)}
                 />
                 {/*<ResearchMenu
                     name="Construction"
@@ -129,26 +149,36 @@ export class ResearchSimulatorView extends React.Component<Props, State> {
                     name="Garrison"
                     devels={devels.filter(x => x.groupID === "garrison")}
                     develsResearched={this.state.develsResearched}
+
+                    onToggleDevel={n => this._onToggleDevel(n)}
                 />
                 <ResearchMenu
                     name="Supremacy"
                     devels={devels.filter(x => x.groupID === "supremacy")}
                     develsResearched={this.state.develsResearched}
+
+                    onToggleDevel={n => this._onToggleDevel(n)}
                 />
                 <ResearchMenu
                     name="Tactical"
                     devels={devels.filter(x => x.groupID === "tactical")}
                     develsResearched={this.state.develsResearched}
+
+                    onToggleDevel={n => this._onToggleDevel(n)}
                 />
                 <ResearchMenu
                     name="Expansion"
                     devels={devels.filter(x => x.groupID === "expansion")}
                     develsResearched={this.state.develsResearched}
+
+                    onToggleDevel={n => this._onToggleDevel(n)}
                 />
                 <ResearchMenu
                     name="Shipyard"
                     devels={devels.filter(x => x.groupID === "shipyard")}
                     develsResearched={this.state.develsResearched}
+
+                    onToggleDevel={n => this._onToggleDevel(n)}
                 />
             </div>
             <hr />
@@ -170,6 +200,13 @@ export class ResearchSimulatorView extends React.Component<Props, State> {
                 tech.add(techBitIndex);
             }
             for (const techBitIndex of stationTypeData.localTech) {
+                tech.add(techBitIndex);
+            }
+        }
+        for (const devID of this.state.develsResearched) {
+            const devData = this.props.coreData.developments.get(devID);
+            console.log(devData);
+            for (const techBitIndex of devData.techEffects) {
                 tech.add(techBitIndex);
             }
         }
@@ -196,6 +233,37 @@ export class ResearchSimulatorView extends React.Component<Props, State> {
     private async _onFactionChange(e: React.ChangeEvent<HTMLSelectElement>): Promise<void> {
         const civData: CivilizationData = this.props.coreData.civilizations.get(parseInt(e.target.value));
         this.setState(this._createFreshState(civData.civID));
+    }
+
+    private _onToggleStationType(stationTypeID: number): void {
+        this.setState(state => {
+            const newSet = new Set(state.stationTypesActive);
+            if (newSet.has(stationTypeID)) {
+                newSet.delete(stationTypeID);
+            } else {
+                newSet.add(stationTypeID);
+            }
+            return {stationTypesActive: newSet};
+        });
+    }
+    //private _onActivateStationType(stationTypeID: number): void {
+    //    this.setState(state => {
+    //        const newSet = new Set(state.stationTypesActive);
+    //        newSet.add(stationTypeID);
+    //        return {stationTypesActive: newSet};
+    //    });
+    //}
+    
+    private _onToggleDevel(devID: number): void {
+        this.setState((state, props) => {
+            const newSet = new Set(state.develsResearched);
+            if (newSet.has(devID)) {
+                newSet.delete(devID);
+            } else {
+                newSet.add(devID);
+            }
+            return {develsResearched: newSet};
+        });
     }
 }
 
