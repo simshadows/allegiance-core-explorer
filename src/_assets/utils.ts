@@ -4,6 +4,11 @@
  * license: GPL-3.0-only <https://www.gnu.org/licenses/gpl-3.0.en.html>
  */
 
+// Left minus Right
+export function setDifference<T>(a: Set<T>, b: Set<T>): Set<T> {
+    return new Set([...a].filter(x => !b.has(x)));
+}
+
 //export function toHumanReadableArrayBuffer(buffer: ArrayBuffer) {
 //    const view = new DataView(buffer);
 //    const arr: Array<string> = [];

@@ -1,4 +1,25 @@
+.research-simulator-view--research-menus {
+    display: flex;
+    flex-direction: row;
+    column-gap: 0.6em;
+}
+
 .research-simulator-view--research-menu {
-    border-style: solid;
+    display: flex;
+    flex-direction: column;
+    row-gap: 0.2em;
+
+    border: thin solid;
+    padding: 0.5em;
+    width: 16em;
+}
+
+.research-simulator-view--research-menu--item {
+    border: thin solid;
+    padding: 0.3em;
+}
+span.research-simulator-view--research-menu--id {
+    font-weight: bold;
+    color: blue;
 }
 
