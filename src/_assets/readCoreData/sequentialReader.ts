@@ -30,9 +30,26 @@ class SequentialReader {
         return this;
     }
 
+    readChar(): number {
+        const n = this._view.getInt8(this._curr);
+        this._inc(1);
+        return n;
+    }
+
     readShort(): number {
         const n = this._view.getInt16(this._curr, IS_LITTLE_ENDIAN);
         this._inc(2);
+        return n;
+    }
+
+    readInt(): number {
+        const n = this._view.getInt32(this._curr, IS_LITTLE_ENDIAN);
+        this._inc(4);
+        return n;
+    }
+    readDWORD(): number {
+        const n = this._view.getUint32(this._curr, IS_LITTLE_ENDIAN);
+        this._inc(4);
         return n;
     }
 
