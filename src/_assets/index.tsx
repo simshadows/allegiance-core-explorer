@@ -5,13 +5,17 @@ import {
     readCoreData,
     type CoreData,
     type CivilizationData,
+    type StationTypeData,
     type DevelopmentData,
 } from "./readCoreData";
 
-import {toHumanReadableArrayBuffer} from "./utils";
+//import {toHumanReadableArrayBuffer} from "./utils";
 
 import "./index.css";
 
+function numSetToHumanReadable(obj: Set<number>) {
+    return Array.from(obj).join(", ");
+}
 
 function renderAttribute(name: string, obj: any) {
     return <li><span className="attribute-name">{name}:</span> {String(obj)}</li>;
@@ -20,9 +24,17 @@ function renderAttribute(name: string, obj: any) {
 function renderCivilization(data: CivilizationData) {
     return <li key={data.civID}>{data.name} <b>({data.civID})</b>
         <ul>
-            {renderAttribute("Base Techs", toHumanReadableArrayBuffer(data.baseTechs))}
-            {renderAttribute("No Dev Techs", toHumanReadableArrayBuffer(data.noDevTechs))}
-            {renderAttribute("Extra Bytes", toHumanReadableArrayBuffer(data.tmpExtraBytes))}
+            {renderAttribute("Base Techs", numSetToHumanReadable(data.baseTechs))}
+        </ul>
+    </li>;
+}
+
+function renderStationType(data: StationTypeData) {
+    return <li key={data.stationTypeID}>{data.name} <b>({data.stationTypeID})</b>
+        <ul>
+            {renderAttribute("Tech Required", numSetToHumanReadable(data.techRequired))}
+            {renderAttribute("Tech Effects", numSetToHumanReadable(data.techEffects))}
+            {renderAttribute("Tech Locals", numSetToHumanReadable(data.localTech))}
         </ul>
     </li>;
 }
@@ -30,9 +42,9 @@ function renderCivilization(data: CivilizationData) {
 function renderDevelopment(data: DevelopmentData) {
     return <li key={data.devID}>{data.name} <b>({data.devID})</b>
         <ul>
-            {renderAttribute("Tech Required", toHumanReadableArrayBuffer(data.techRequired))}
-            {renderAttribute("Tech Effects", toHumanReadableArrayBuffer(data.techEffects))}
-            {renderAttribute("Extra Bytes", toHumanReadableArrayBuffer(data.tmpExtraBytes))}
+            {renderAttribute("Group ID", data.groupID)}
+            {renderAttribute("Tech Required", numSetToHumanReadable(data.techRequired))}
+            {renderAttribute("Tech Effects", numSetToHumanReadable(data.techEffects))}
         </ul>
     </li>;
 }
@@ -85,6 +97,14 @@ class PlaceholderComponent extends React.Component<{}, State> {
                     Array.from(this.state.coreData.developments)
                         .sort(([k1, a], [k2, b]) => a.name.localeCompare(b.name))
                         .map(([k, v]) => renderDevelopment(v))
+                }
+            </ul>
+            <h2>Stations</h2>
+            <ul>
+                {
+                    Array.from(this.state.coreData.stationTypes)
+                        .sort(([k1, a], [k2, b]) => a.name.localeCompare(b.name))
+                        .map(([k, v]) => renderStationType(v))
                 }
             </ul>
         </>;

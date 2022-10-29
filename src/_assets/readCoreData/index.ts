@@ -75,10 +75,59 @@ function readGlobalAttributeSet(reader: SequentialReader) {
 
 /*** ***/
 
-type TechTreeBitMask = ArrayBuffer; // TODO: What is this? How do I read it?
+type TechTreeBitMask = Set<number>;
 
+// Could be more efficient, but I'll prefer the readability for now.
 function readTechTreeBitMask(reader: SequentialReader) {
-    return reader.readBitArray(c.c_ttbMax);
+    const view = new DataView(reader.readBitArray(c.c_ttbMax));
+
+    const bits: Array<boolean> = [];
+    for (let i = 0; i < view.byteLength; ++i) {
+        const num = view.getUint8(i);
+        for (let j = 0; j < 8; ++j) {
+            bits.push(!!(num & (1 << j)));
+        }
+    }
+
+    const indices: Set<number> = new Set();
+    for (const [i, isSet] of bits.entries()) {
+        if (isSet) indices.add(i);
+    }
+    return indices;
+}
+
+/*** ***/
+
+interface Buyable {
+    price:       number;
+    timeToBuild: number;
+
+    modelName:   string;
+    iconName:    string;
+    name:        string;
+    description: string;
+
+    groupID: number;
+
+    techRequired: TechTreeBitMask;
+    techEffects:  TechTreeBitMask;
+}
+
+function readBuyableData(reader: SequentialReader): Buyable {
+    return {
+        price: reader.readInt(),
+        timeToBuild: reader.readDWORD(),
+
+        modelName: reader.readString(c.c_cbFileName + 1),
+        iconName: reader.readString(c.c_cbFileName),
+        name: reader.readString(c.c_cbName),
+        description: reader.readString(c.c_cbDescription),
+
+        groupID: reader.readChar(),
+
+        techRequired: readTechTreeBitMask(reader),
+        techEffects: readTechTreeBitMask(reader),
+    };
 }
 
 /*** ***/
@@ -127,20 +176,163 @@ function readCivilizationData(buf: ArrayBuffer): CivilizationData {
 
 /*** ***/
 
-export interface DevelopmentData {
-    price:       number;
-    timeToBuild: number;
+export interface StationTypeData extends Buyable {
+    signature:          number;
+    maxArmorHitPoints:  number;
+    maxShieldHitPoints: number;
+    armorRegeneration:  number;
+    shieldRegeneration: number;
+    scannerRange:       number;
+    income:             number;
+    radius:             number;
 
-    modelName:   string;
-    iconName:    string;
-    name:        string;
-    description: string;
+    localTech: TechTreeBitMask;
 
-    groupID: number;
+    stationTypeID:          number;
+    successorStationTypeID: number;
 
-    techRequired: TechTreeBitMask;
-    techEffects:  TechTreeBitMask;
+    defenseTypeArmor:  number;
+    defenseTypeShield: number;
 
+    capabilities: {
+        unload:              boolean;
+        start:               boolean;
+        restart:             boolean;
+        ripcord:             boolean;
+        capture:             boolean;
+        land:                boolean;
+        repair:              boolean;
+        remoteLeadIndicator: boolean;
+        reload:              boolean;
+        flag:                boolean;
+        pedestal:            boolean;
+        teleportUnload:      boolean;
+        capLand:             boolean;
+        rescue:              boolean;
+        rescueAny:           boolean;
+    };
+    asteroidAbility: {
+        mineHe3:     boolean;
+        mineLotsHe3: boolean;
+        mineGold:    boolean;
+
+        buildable:   boolean;
+        special:     boolean;
+    };
+
+    stationClassID:          number;
+    constructionDroneTypeID: number;
+
+    soundIDs: {
+        constructorNeedRockSound:    number;
+        constructorUnderAttackSound: number;
+        constructorDestroyedSound:   number;
+        completionSound:             number;
+
+        interiorSound:      number;
+        exteriorSound:      number;
+        interiorAlertSound: number;
+
+        underAttackSound: number;
+        criticalSound:    number;
+        destroyedSound:   number;
+        capturedSound:    number;
+
+        enemyCapturedSound:  number;
+        enemyDestroyedSound: number;
+    };
+
+    textureName: string;
+    builderName: string;
+}
+
+function readStationCapabilities(n: number) {
+    return {
+        unload:              !!(n & (1 <<  0)),
+        start:               !!(n & (1 <<  1)),
+        restart:             !!(n & (1 <<  2)),
+        ripcord:             !!(n & (1 <<  3)),
+        capture:             !!(n & (1 <<  4)),
+        land:                !!(n & (1 <<  5)),
+        repair:              !!(n & (1 <<  6)),
+        remoteLeadIndicator: !!(n & (1 <<  7)),
+        reload:              !!(n & (1 <<  8)),
+        flag:                !!(n & (1 <<  9)),
+        pedestal:            !!(n & (1 << 10)),
+        teleportUnload:      !!(n & (1 << 11)),
+        capLand:             !!(n & (1 << 12)),
+        rescue:              !!(n & (1 << 13)),
+        rescueAny:           !!(n & (1 << 14)),
+    };
+}
+
+function readAsteroidAbility(n: number) {
+    return {
+        mineHe3:     !!(n & (1 << 0)),
+        mineLotsHe3: !!(n & (1 << 1)),
+        mineGold:    !!(n & (1 << 2)),
+
+        buildable:   !!(n & (1 << 3)),
+        special:     !!(n & (1 << 4)),
+    };
+}
+
+function readStationTypeData(buf: ArrayBuffer): StationTypeData {
+    const r = new SequentialReader(buf);
+    const obj: StationTypeData = {
+        ...readBuyableData(r),
+
+        signature: r.skipBytes(2).readFloat(),
+        maxArmorHitPoints: r.readFloat(),
+        maxShieldHitPoints: r.readFloat(),
+        armorRegeneration: r.readFloat(),
+        shieldRegeneration: r.readFloat(),
+        scannerRange: r.readFloat(),
+        income: r.readInt(),
+        radius: r.readFloat(),
+
+        localTech: readTechTreeBitMask(r),
+
+        stationTypeID: r.readShort(),
+        successorStationTypeID: r.readShort(),
+
+        defenseTypeArmor:  r.readUnsignedChar(),
+        defenseTypeShield: r.readUnsignedChar(),
+        
+        capabilities: readStationCapabilities(r.readUnsignedShort()),
+        asteroidAbility: readAsteroidAbility(r.readUnsignedShort()),
+
+        stationClassID: r.readUnsignedChar(),
+        constructionDroneTypeID: r.skipBytes(1).readShort(),
+
+        soundIDs: {
+            constructorNeedRockSound: r.readShort(),
+            constructorUnderAttackSound: r.readShort(),
+            constructorDestroyedSound: r.readShort(),
+            completionSound: r.readShort(),
+
+            interiorSound: r.readShort(),
+            exteriorSound: r.readShort(),
+            interiorAlertSound: r.readShort(),
+
+            underAttackSound: r.readShort(),
+            criticalSound: r.readShort(),
+            destroyedSound: r.readShort(),
+            capturedSound: r.readShort(),
+
+            enemyCapturedSound: r.readShort(),
+            enemyDestroyedSound: r.readShort(),
+        },
+
+        textureName: r.readString(c.c_cbFileName),
+        builderName: r.readString(c.c_cbName),
+    };
+    return obj;
+}
+
+/*** ***/
+
+export interface DevelopmentData extends Buyable {
     tmpExtraBytes: ArrayBuffer; // This is just here while I fugre out how this works.
     globalAttributeSet: GlobalAttributeSet;
 
@@ -151,18 +343,7 @@ export interface DevelopmentData {
 function readDevelopmentData(buf: ArrayBuffer): DevelopmentData {
     const r = new SequentialReader(buf);
     const obj: DevelopmentData = {
-        price: r.readInt(),
-        timeToBuild: r.readDWORD(),
-
-        modelName: r.readString(c.c_cbFileName + 1),
-        iconName: r.readString(c.c_cbFileName),
-        name: r.readString(c.c_cbName),
-        description: r.readString(c.c_cbDescription),
-
-        groupID: r.readChar(),
-
-        techRequired: readTechTreeBitMask(r),
-        techEffects: readTechTreeBitMask(r),
+        ...readBuyableData(r),
 
         tmpExtraBytes: r.extractBytes(2),
         globalAttributeSet: readGlobalAttributeSet(r),
@@ -180,6 +361,7 @@ export interface CoreData {
     cfmapSize: number;
 
     civilizations: Map<number, CivilizationData>;
+    stationTypes:  Map<number, StationTypeData>;
     developments:  Map<number, DevelopmentData>;
 }
 
@@ -198,6 +380,7 @@ export async function readCoreData(): Promise<CoreData> {
         cfmapSize:   view.getInt32(4, true),
 
         civilizations: new Map(),
+        stationTypes:  new Map(),
         developments:  new Map(),
     }
 
@@ -221,6 +404,15 @@ export async function readCoreData(): Promise<CoreData> {
                 }
                 data.civilizations.set(civData.civID, civData);
                 break;
+
+            case c.OT_stationType:
+                const stationTypeData = readStationTypeData(buf.slice(curr, curr + objSize));
+                if (data.stationTypes.has(stationTypeData.stationTypeID)) {
+                    throw new Error(`Duplicate station type ID: ${stationTypeData.stationTypeID}`);
+                }
+                data.stationTypes.set(stationTypeData.stationTypeID, stationTypeData);
+                break;
+
             case c.OT_development:
                 const devData = readDevelopmentData(buf.slice(curr, curr + objSize))
                 if (data.developments.has(devData.devID)) {

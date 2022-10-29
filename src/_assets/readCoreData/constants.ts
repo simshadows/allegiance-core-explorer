@@ -96,7 +96,7 @@ export default {
     //OT_bucketStart      : 29,
     //OT_hullType         : 29,
     //OT_partType         : 30,
-    //OT_stationType      : 31,
+    OT_stationType      : 31,
     OT_development      : 32,
     //OT_droneType        : 33,
     //OT_bucketEnd        : 33,

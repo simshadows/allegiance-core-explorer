@@ -35,9 +35,19 @@ class SequentialReader {
         this._inc(1);
         return n;
     }
+    readUnsignedChar(): number {
+        const n = this._view.getUint8(this._curr);
+        this._inc(1);
+        return n;
+    }
 
     readShort(): number {
         const n = this._view.getInt16(this._curr, IS_LITTLE_ENDIAN);
+        this._inc(2);
+        return n;
+    }
+    readUnsignedShort(): number {
+        const n = this._view.getUint16(this._curr, IS_LITTLE_ENDIAN);
         this._inc(2);
         return n;
     }
