@@ -1,13 +1,14 @@
 /*
- * extractedConstants.ts
+ * constants.ts
  * author: simshadows <contact@simshadows.com>
  * license: GPL-3.0-only <https://www.gnu.org/licenses/gpl-3.0.en.html>
  *
  * Copyright (C) 2008 FAZ Dev Team. All Rights Reserved.
- * 
- * All values from here were extracted from Allegiance IGC Core editor
- * <https://github.com/kgersen/allegice> by KGJV <kirthalleg@gmail.com>,
- * which itself was extracted from the Allegiance codebase.
+ *
+ * further attribution:
+ *      This is a derivative work of Allegiance IGC Core editor
+ *      <https://github.com/kgersen/allegice> by KGJV <kirthalleg@gmail.com>,
+ *      which in turn is a derivative work of Microsoft Allegiance.
  */
 
 const c_cbFileNameDB    = 12;
@@ -24,6 +25,8 @@ const c_cbPassportName  = 256 + 1;
 const c_fcidMax  = 40;
 const c_dmgidMax = 20;
 const c_defidMax = 20;
+
+const c_ttbMax = 400;
 
 /*** ***/
 
@@ -42,6 +45,8 @@ export default {
     c_fcidMax,
     c_dmgidMax,
     c_defidMax,
+
+    c_ttbMax,
 
     // ObjectType
     //OT_invalid          : -1,
