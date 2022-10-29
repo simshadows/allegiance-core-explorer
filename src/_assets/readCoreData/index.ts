@@ -83,7 +83,7 @@ function readTechTreeBitMask(reader: SequentialReader) {
 
 /*** ***/
 
-interface CivilizationData {
+export interface CivilizationData {
     incomeMoney: number;
     bonusMoney:  number;
     name:        string;
@@ -93,6 +93,7 @@ interface CivilizationData {
     baseTechs:  TechTreeBitMask;
     noDevTechs: TechTreeBitMask;
 
+    tmpExtraBytes: ArrayBuffer; // This is just here while I fugre out how this works.
     baseAttributes: GlobalAttributeSet;
 
     lifepod:              number;
@@ -112,7 +113,8 @@ function readCivilizationData(buf: ArrayBuffer): CivilizationData {
         baseTechs: readTechTreeBitMask(r),
         noDevTechs: readTechTreeBitMask(r),
 
-        baseAttributes: readGlobalAttributeSet(r.skipBytes(1)),
+        tmpExtraBytes: r.extractBytes(1),
+        baseAttributes: readGlobalAttributeSet(r),
 
         lifepod: r.readShort(),
         civID: r.readShort(),
@@ -125,7 +127,7 @@ function readCivilizationData(buf: ArrayBuffer): CivilizationData {
 
 /*** ***/
 
-interface DevelopmentData {
+export interface DevelopmentData {
     price:       number;
     timeToBuild: number;
 
@@ -139,6 +141,7 @@ interface DevelopmentData {
     techRequired: TechTreeBitMask;
     techEffects:  TechTreeBitMask;
 
+    tmpExtraBytes: ArrayBuffer; // This is just here while I fugre out how this works.
     globalAttributeSet: GlobalAttributeSet;
 
     devID: number;
@@ -161,22 +164,23 @@ function readDevelopmentData(buf: ArrayBuffer): DevelopmentData {
         techRequired: readTechTreeBitMask(r),
         techEffects: readTechTreeBitMask(r),
 
-        globalAttributeSet: readGlobalAttributeSet(r.skipBytes(2)),
+        tmpExtraBytes: r.extractBytes(2),
+        globalAttributeSet: readGlobalAttributeSet(r),
 
         devID: r.readShort(),
         completionSoundID: r.readShort(),
     };
-    console.log(obj);
     return obj;
 }
 
 /*** ***/
 
-interface CoreData {
+export interface CoreData {
     iCoreHeader: number;
+    cfmapSize: number;
 
-    civilization: Array<CivilizationData>;
-    development: Array<DevelopmentData>;
+    civilizations: Map<number, CivilizationData>;
+    developments:  Map<number, DevelopmentData>;
 }
 
 async function fetchCoreData(): Promise<ArrayBuffer> {
@@ -185,19 +189,21 @@ async function fetchCoreData(): Promise<ArrayBuffer> {
     return await res.arrayBuffer();
 }
 
-async function readCoreData(): Promise<void> {
+export async function readCoreData(): Promise<CoreData> {
     const buf = await fetchCoreData();
     const view = new DataView(buf);
 
     const data: CoreData = {
         iCoreHeader: view.getInt32(0, true),
+        cfmapSize:   view.getInt32(4, true),
 
-        civilization: [],
-        development: [],
+        civilizations: new Map(),
+        developments:  new Map(),
     }
 
-    const cfmapSize = view.getInt32(4, true);
-    if (cfmapSize !== view.byteLength - 8) throw "Expected to match data size."; // Might not be necessary
+    if (data.cfmapSize !== view.byteLength - 8) {
+        throw "Expected to match data size."; // Might not be necessary
+    }
 
     let curr = 8;
     while (curr < view.byteLength) {
@@ -209,14 +215,18 @@ async function readCoreData(): Promise<void> {
         switch (objType) {
 
             case c.OT_civilization:
-                data.civilization.push(
-                    readCivilizationData(buf.slice(curr, curr + objSize))
-                );
+                const civData = readCivilizationData(buf.slice(curr, curr + objSize));
+                if (data.civilizations.has(civData.civID)) {
+                    throw new Error(`Duplicate civilization ID: ${civData.civID}`);
+                }
+                data.civilizations.set(civData.civID, civData);
                 break;
             case c.OT_development:
-                data.development.push(
-                    readDevelopmentData(buf.slice(curr, curr + objSize))
-                );
+                const devData = readDevelopmentData(buf.slice(curr, curr + objSize))
+                if (data.developments.has(devData.devID)) {
+                    throw new Error(`Duplicate development ID: ${devData.devID}`);
+                }
+                data.developments.set(devData.devID, devData);
                 break;
 
             case c.OT_constants:
@@ -232,9 +242,7 @@ async function readCoreData(): Promise<void> {
         curr += objSize;
     }
 
-    console.log(`cfmapSize = ${cfmapSize}`);
     console.log(data);
+    return data;
 }
-
-export {readCoreData};
 

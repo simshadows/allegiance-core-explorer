@@ -72,13 +72,15 @@ class SequentialReader {
         return s.slice(0, nullPos);
     }
 
-    readBitArray(numBits: number): ArrayBuffer {
-        const byteLen = numBits / 8;
-        if (byteLen % 1 !== 0) throw new Error("Expected whole number of bytes.");
-
+    extractBytes(byteLen: number): ArrayBuffer {
         const newBuf = this._view.buffer.slice(this._curr, this._curr + byteLen);
         this._inc(byteLen);
         return newBuf;
+    }
+    readBitArray(numBits: number): ArrayBuffer {
+        const byteLen = numBits / 8;
+        if (byteLen % 1 !== 0) throw new Error("Expected whole number of bytes.");
+        return this.extractBytes(byteLen);
     }
 
     private _inc(len: number): void {
