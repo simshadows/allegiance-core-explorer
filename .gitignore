@@ -3,7 +3,7 @@
 ################################
 
 /dist
-/public/*.igc
+#/public/*.igc # We allow core files now
 
 ##############################
 ### yarn Generated Ignores ###

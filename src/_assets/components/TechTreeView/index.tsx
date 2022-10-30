@@ -8,12 +8,12 @@ import {
     //type DevelopmentData,
 } from "../../readCoreData";
 
-//import {
-//    type GroupID,
-//} from "../../types";
+import {
+    getReachableBuyables,
+    analyzeTechTreeDependencies,
+} from "../../analyzer";
 
-//import {setDifference} from "../../utils";
-import {analyzeTechTreeDependencies} from "../../analyzer";
+import {CivilizationSelector} from "../common/CivilizationSelector";
 
 import "./index.css";
 
@@ -24,23 +24,46 @@ interface Props {
 }
 
 interface State {
+    civID: number;
 }
 
 export class TechTreeView extends React.Component<Props, State> {
     constructor(props: Props) {
         super(props);
+
+        const civData = Array.from(this.props.coreData.civilizations.values())[0];
+        if (!civData) throw new Error("Unexpected undefined value.");
+        this.state = {
+            civID: civData.civID,
+        };
     }
 
     override render() {
         console.log(this.props);
 
         return <>
+            <p>
+                <CivilizationSelector
+                    currentCivID={this.state.civID}
+                    civilizationsMap={this.props.coreData.civilizations}
+                    onChange={(e) => this._onFactionChange(e)}
+                />
+            </p>
             <ReactECharts option={this._getEChartsOption()} />
         </>;
     }
 
+    private _onFactionChange(newCivID: number): void {
+        this.setState({
+            civID: newCivID,
+        });
+    }
+
     private _getEChartsOption() {
-        console.log(analyzeTechTreeDependencies(this.props.coreData));
+        const civData = this.props.coreData.civilizations.get(this.state.civID);
+        if (!civData) throw new Error("Unexpected undefined value.");
+        const reachables = getReachableBuyables(this.props.coreData, civData);
+        console.log(analyzeTechTreeDependencies(reachables));
 
         return {
             //title: {

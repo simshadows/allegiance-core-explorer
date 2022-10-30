@@ -7,11 +7,17 @@ import {
     type DevelopmentData,
 } from "../../readCoreData";
 
+import {
+    getTechResearched,
+    getReachableDevels,
+    getReachableStationTypes,
+} from "../../analyzer";
+
 //import {
 //    type GroupID,
 //} from "../../types";
 
-import {setDifference} from "../../utils";
+import {CivilizationSelector} from "../common/CivilizationSelector";
 
 import "./index.css";
 
@@ -122,15 +128,11 @@ export class ResearchSimulatorView extends React.Component<Props, State> {
 
         return <>
             <p>
-                <select value={this.state.civID} onChange={(e) => this._onFactionChange(e)}>
-                    {
-                        Array.from(this.props.coreData.civilizations)
-                            .sort(([_, a], [__, b]) => a.name.localeCompare(b.name))
-                            .map(([k, v]) =>
-                                <option key={k} value={k}>{v.name}</option>
-                            )
-                    }
-                </select>
+                <CivilizationSelector
+                    currentCivID={this.state.civID}
+                    civilizationsMap={this.props.coreData.civilizations}
+                    onChange={(e) => this._onFactionChange(e)}
+                />
             </p>
             <div className="research-simulator-view--research-menus">
                 <ConstructionMenu
@@ -192,52 +194,24 @@ export class ResearchSimulatorView extends React.Component<Props, State> {
     private _getTechResearched(): Set<number> {
         const civData = this.props.coreData.civilizations.get(this.state.civID);
         if (!civData) throw new Error("Unexpected undefined value.");
-        const tech: Set<number> = new Set(civData.baseTechs);
-        tech.add(3);
-        tech.add(4);
-        tech.add(5);
-        tech.add(6);
-        for (const stationTypeID of this.state.stationTypesActive) {
-            const stationTypeData = this.props.coreData.stationTypes.get(stationTypeID);
-            if (!stationTypeData) throw new Error("Unexpected undefined value.");
-            for (const techBitIndex of stationTypeData.techEffects) {
-                tech.add(techBitIndex);
-            }
-            for (const techBitIndex of stationTypeData.localTech) {
-                tech.add(techBitIndex);
-            }
-        }
-        for (const devID of this.state.develsResearched) {
-            const devData = this.props.coreData.developments.get(devID);
-            if (!devData) throw new Error("Unexpected undefined value.");
-            for (const techBitIndex of devData.techEffects) {
-                tech.add(techBitIndex);
-            }
-        }
-        return tech;
+        return getTechResearched(
+            this.props.coreData,
+            new Set(civData.baseTechs),
+            this.state.stationTypesActive,
+            this.state.develsResearched,
+        );
     }
 
     private _getReachableDevels(): Array<DevelopmentData> {
-        const tech: Set<number> = this._getTechResearched();
-        const arr: Array<DevelopmentData> = Array
-            .from(this.props.coreData.developments.values())
-            .filter(x => setDifference(x.techRequired, tech).size === 0);
-        return arr;
+        return getReachableDevels(this.props.coreData, this._getTechResearched());
     }
 
     private _getReachableStationTypes(): Array<StationTypeData> {
-        const tech: Set<number> = this._getTechResearched();
-        console.log(this.props.coreData.stationTypes);
-        const arr: Array<StationTypeData> = Array
-            .from(this.props.coreData.stationTypes.values())
-            .filter(x => setDifference(x.techRequired, tech).size === 0);
-        return arr;
+        return getReachableStationTypes(this.props.coreData, this._getTechResearched());
     }
 
-    private async _onFactionChange(e: React.ChangeEvent<HTMLSelectElement>): Promise<void> {
-        const civData = this.props.coreData.civilizations.get(parseInt(e.target.value));
-        if (!civData) throw new Error("Unexpected undefined value.");
-        this.setState(this._createFreshState(civData.civID));
+    private _onFactionChange(newCivID: number): void {
+        this.setState(this._createFreshState(newCivID));
     }
 
     private _onToggleStationType(stationTypeID: number): void {
