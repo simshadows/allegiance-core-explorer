@@ -1,5 +1,4 @@
 import React from "react";
-import {createRoot} from "react-dom/client";
 
 import {
     type CoreData,
@@ -57,24 +56,24 @@ export function DebuggingView(props: Props) {
         <ul>
             {
                 Array.from(props.coreData.civilizations)
-                    .sort(([k1, a], [k2, b]) => a.name.localeCompare(b.name))
-                    .map(([k, v]) => renderCivilization(v))
+                    .sort(([_, a], [__, b]) => a.name.localeCompare(b.name))
+                    .map(([_, v]) => renderCivilization(v))
             }
         </ul>
         <h2>Devels</h2>
         <ul>
             {
                 Array.from(props.coreData.developments)
-                    .sort(([k1, a], [k2, b]) => a.name.localeCompare(b.name))
-                    .map(([k, v]) => renderDevelopment(v))
+                    .sort(([_, a], [__, b]) => a.name.localeCompare(b.name))
+                    .map(([_, v]) => renderDevelopment(v))
             }
         </ul>
         <h2>Stations</h2>
         <ul>
             {
                 Array.from(props.coreData.stationTypes)
-                    .sort(([k1, a], [k2, b]) => a.name.localeCompare(b.name))
-                    .map(([k, v]) => renderStationType(v))
+                    .sort(([_, a], [__, b]) => a.name.localeCompare(b.name))
+                    .map(([_, v]) => renderStationType(v))
             }
         </ul>
     </>;

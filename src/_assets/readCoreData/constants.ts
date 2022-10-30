@@ -14,13 +14,13 @@
 const c_cbFileNameDB    = 12;
 const c_cbDescriptionDB = 200;
 const c_cbNameDB        = 24;
-const c_cbLocAbrevDB    = 8;
+//const c_cbLocAbrevDB    = 8;
 const c_cbFileName      = c_cbFileNameDB    + 1;
 const c_cbDescription   = c_cbDescriptionDB + 1;
 const c_cbName          = c_cbNameDB        + 1;
-const c_cbLocAbrev      = c_cbLocAbrevDB    + 1;
-const c_cbCDKey         = 32 + 1;
-const c_cbPassportName  = 256 + 1;
+//const c_cbLocAbrev      = c_cbLocAbrevDB    + 1;
+//const c_cbCDKey         = 32 + 1;
+//const c_cbPassportName  = 256 + 1;
 
 const c_fcidMax  = 40;
 const c_dmgidMax = 20;

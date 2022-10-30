@@ -39,7 +39,7 @@ class App extends React.Component<{}, State> {
         console.log("Successfully loaded '/ac_07.igc' from the server.");
     }
 
-    render() {
+    override render() {
         return <>
             <h1>Prototype Allegiance Core Explorer</h1>
             <p><input type="file" onChange={(e) => this._onUpload(e)} /></p>
@@ -81,13 +81,14 @@ class App extends React.Component<{}, State> {
         console.log(e);
         const target: HTMLInputElement = e.target;
 
-        if (target.files.length === 0) {
+        if (target.files?.length === 0) {
             return;
-        } else if (target.files.length !== 1) {
+        } else if (target.files?.length !== 1) {
             throw new Error("File upload should never take multiple files.");
         }
 
-        const buf: ArrayBuffer = await target.files[0].arrayBuffer();
+        const buf = await target.files[0]?.arrayBuffer();
+        if (!buf) throw new Error("Unexpected undefined value.");
         await this._loadCoreFile(buf);
     }
 
@@ -103,7 +104,10 @@ class App extends React.Component<{}, State> {
     }
 }
 
-const root = createRoot(document.getElementById("app-mount"));
+const mountPoint = document.getElementById("app-mount");
+if (!mountPoint) throw new Error("Unexpected null value.");
+
+const root = createRoot(mountPoint);
 root.render(
     <React.StrictMode>
         <App />

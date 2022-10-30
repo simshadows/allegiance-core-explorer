@@ -2,7 +2,7 @@ import React from "react";
 
 import {
     type CoreData,
-    type CivilizationData,
+    //type CivilizationData,
     type StationTypeData,
     type DevelopmentData,
 } from "../../readCoreData";
@@ -99,12 +99,14 @@ export class ResearchSimulatorView extends React.Component<Props, State> {
     constructor(props: Props) {
         super(props);
 
-        const civData: CivilizationData = Array.from(this.props.coreData.civilizations.values())[0];
+        const civData = Array.from(this.props.coreData.civilizations.values())[0];
+        if (!civData) throw new Error("Unexpected undefined value.");
         this.state = this._createFreshState(civData.civID);
     }
 
     private _createFreshState(civID: number): State {
-        const civData: CivilizationData = this.props.coreData.civilizations.get(civID);
+        const civData = this.props.coreData.civilizations.get(civID);
+        if (!civData) throw new Error("Unexpected undefined value.");
         return {
             develsResearched: new Set(),
             stationTypesActive: new Set([civData.initialStationTypeID]),
@@ -112,7 +114,7 @@ export class ResearchSimulatorView extends React.Component<Props, State> {
         };
     }
 
-    render() {
+    override render() {
         console.log(this.state);
 
         const devels: Array<DevelopmentData> = this._getReachableDevels();
@@ -123,7 +125,7 @@ export class ResearchSimulatorView extends React.Component<Props, State> {
                 <select value={this.state.civID} onChange={(e) => this._onFactionChange(e)}>
                     {
                         Array.from(this.props.coreData.civilizations)
-                            .sort(([k1, a], [k2, b]) => a.name.localeCompare(b.name))
+                            .sort(([_, a], [__, b]) => a.name.localeCompare(b.name))
                             .map(([k, v]) =>
                                 <option key={k} value={k}>{v.name}</option>
                             )
@@ -188,7 +190,8 @@ export class ResearchSimulatorView extends React.Component<Props, State> {
     }
 
     private _getTechResearched(): Set<number> {
-        const civData: CivilizationData = this.props.coreData.civilizations.get(this.state.civID);
+        const civData = this.props.coreData.civilizations.get(this.state.civID);
+        if (!civData) throw new Error("Unexpected undefined value.");
         const tech: Set<number> = new Set(civData.baseTechs);
         tech.add(3);
         tech.add(4);
@@ -196,6 +199,7 @@ export class ResearchSimulatorView extends React.Component<Props, State> {
         tech.add(6);
         for (const stationTypeID of this.state.stationTypesActive) {
             const stationTypeData = this.props.coreData.stationTypes.get(stationTypeID);
+            if (!stationTypeData) throw new Error("Unexpected undefined value.");
             for (const techBitIndex of stationTypeData.techEffects) {
                 tech.add(techBitIndex);
             }
@@ -205,7 +209,7 @@ export class ResearchSimulatorView extends React.Component<Props, State> {
         }
         for (const devID of this.state.develsResearched) {
             const devData = this.props.coreData.developments.get(devID);
-            console.log(devData);
+            if (!devData) throw new Error("Unexpected undefined value.");
             for (const techBitIndex of devData.techEffects) {
                 tech.add(techBitIndex);
             }
@@ -231,7 +235,8 @@ export class ResearchSimulatorView extends React.Component<Props, State> {
     }
 
     private async _onFactionChange(e: React.ChangeEvent<HTMLSelectElement>): Promise<void> {
-        const civData: CivilizationData = this.props.coreData.civilizations.get(parseInt(e.target.value));
+        const civData = this.props.coreData.civilizations.get(parseInt(e.target.value));
+        if (!civData) throw new Error("Unexpected undefined value.");
         this.setState(this._createFreshState(civData.civID));
     }
 
@@ -255,7 +260,7 @@ export class ResearchSimulatorView extends React.Component<Props, State> {
     //}
     
     private _onToggleDevel(devID: number): void {
-        this.setState((state, props) => {
+        this.setState(state => {
             const newSet = new Set(state.develsResearched);
             if (newSet.has(devID)) {
                 newSet.delete(devID);
