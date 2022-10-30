@@ -103,7 +103,7 @@ function readTechTreeBitMask(reader: SequentialReader) {
 
 /*** ***/
 
-interface Buyable {
+export interface Buyable {
     price:       number;
     timeToBuild: number;
 

@@ -145,7 +145,7 @@ export function getProviders(
     };
 
     for (const stationTypeData of stationTypes.values()) {
-        for (const i of stationTypeData.techEffects) {
+        for (const i of new Set([...stationTypeData.techEffects, ...stationTypeData.localTech])) {
             const p: Providers = getIndex(i);
             p.stationTypes.set(stationTypeData.stationTypeID, stationTypeData);
         }
@@ -157,6 +157,86 @@ export function getProviders(
         }
     }
     return ret;
+}
+
+/*** ***/
+
+export interface Dependencies {
+    requiredTechFiltered: Set<number>; // Bitmask indices
+
+    stationTypes: Map<number, StationTypeData>; // Station type ID --> Data obj
+    developments: Map<number, DevelopmentData>; // Development ID --> Data obj
+}
+
+export function getDependencies(
+    requiredTech: Set<number>,
+    techToIgnore: Set<number>,
+    providersMap: Map<number, Providers>,
+): Dependencies {
+    const deps: Dependencies = {
+        requiredTechFiltered: setDifference(requiredTech, techToIgnore),
+
+        stationTypes: new Map(),
+        developments: new Map(),
+    };
+    for (const i of deps.requiredTechFiltered) {
+        const providers = providersMap.get(i);
+        //if (!providers) throw new Error("Unexpected undefined.");
+        if (!providers) {
+            if (i >= 3 && i <= 6) continue;
+            console.error(`No provider for ${i}`);
+            continue;
+        }
+        deps.stationTypes = new Map([...deps.stationTypes, ...providers.stationTypes]);
+        deps.developments = new Map([...deps.developments, ...providers.developments]);
+    }
+    return deps;
+}
+
+/*** ***/
+
+export interface AllDependencies {
+    stationTypes: Map<number, {obj: StationTypeData; deps: Dependencies;}>; // Station type ID --> Data obj
+    developments: Map<number, {obj: DevelopmentData; deps: Dependencies;}>; // Development ID --> Data obj
+}
+
+export function getAllDependencies(
+    stationTypes: Map<number, StationTypeData>,
+    devels:       Map<number, DevelopmentData>,
+    techToIgnore: Set<number>,
+    providersMap: Map<number, Providers>,
+): AllDependencies {
+    const deps: AllDependencies = {
+        stationTypes: new Map(),
+        developments: new Map(),
+    };
+    for (const stationTypeData of stationTypes.values()) {
+        deps.stationTypes.set(
+            stationTypeData.stationTypeID,
+            {
+                obj: stationTypeData,
+                deps: getDependencies(
+                    stationTypeData.techRequired,
+                    techToIgnore,
+                    providersMap,
+                ),
+            },
+        );
+    }
+    for (const devData of devels.values()) {
+        deps.developments.set(
+            devData.devID,
+            {
+                obj: devData,
+                deps: getDependencies(
+                    devData.techRequired,
+                    techToIgnore,
+                    providersMap,
+                ),
+            },
+        );
+    }
+    return deps;
 }
 
 /*** ***/

@@ -9,46 +9,17 @@ import {
 
 import {
     getReachableBuyables,
-    type Providers,
     getProviders,
+    getAllDependencies,
     analyzeTechTreeDependencies,
 } from "../../analyzer";
 
 import {CivilizationSelector} from "../common/CivilizationSelector";
 
+import {ProviderDisplay} from "./ProviderDisplay";
+import {DependenciesDisplay} from "./DependenciesDisplay";
+
 import "./index.css";
-
-/*** ***/
-
-//function numSetToHumanReadable(obj: Set<number>) {
-//    return Array.from(obj).join(", ");
-//}
-
-//function renderAttribute(name: string, obj: any) {
-//    return <li><span className="attribute-name">{name}:</span> {String(obj)}</li>;
-//}
-
-function renderProvider(bitIndex: number, providers: Providers) {
-    return <tr key={bitIndex}>
-        <td>{bitIndex}</td>
-        <td>
-            {
-                Array.from(providers.stationTypes.values()).map(x =>
-                    <span key={`st${x.stationTypeID}`}><span className="debugging-view-2--type">Station: </span>
-                        {x.name}
-                    </span>
-                )
-            }
-            {
-                Array.from(providers.developments.values()).map(x =>
-                    <span key={`st${x.devID}`}><span className="debugging-view-2--type">Devel: </span>
-                        {x.name}
-                    </span>
-                )
-            }
-        </td>
-    </tr>;
-}
 
 /*** ***/
 
@@ -76,9 +47,14 @@ export class DebuggingView2 extends React.Component<Props, State> {
         if (!civData) throw new Error("Unexpected undefined value.");
         const reachables = getReachableBuyables(this.props.coreData, civData);
         const providers = getProviders(reachables.stationTypes, reachables.developments);
+        const dependencies = getAllDependencies(
+            reachables.stationTypes,
+            reachables.developments,
+            civData.baseTechs,
+            providers,
+        );
         console.log(analyzeTechTreeDependencies(reachables));
-
-        console.log(providers);
+        console.log(dependencies);
 
         return <>
             <p>
@@ -89,20 +65,20 @@ export class DebuggingView2 extends React.Component<Props, State> {
                 />
             </p>
             <h2>Providers</h2>
-            <table className="debugging-view-2">
-                <thead>
-                    <tr>
-                        <th>Index</th>
-                        <th>Providers</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    {
-                        Array.from(providers).sort(([a, _], [b, __]) => Math.sign(a - b))
-                            .map(([k, v]) => renderProvider(k, v))
-                    }
-                </tbody>
-            </table>
+            <ProviderDisplay
+                providers={providers}
+                civData={civData}
+            />
+            <h2>Dependencies: Station Types</h2>
+            <DependenciesDisplay
+                dependencies={dependencies.stationTypes}
+                civData={civData}
+            />
+            <h2>Dependencies: Devels</h2>
+            <DependenciesDisplay
+                dependencies={dependencies.developments}
+                civData={civData}
+            />
         </>;
     }
 
