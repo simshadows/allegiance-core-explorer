@@ -2,9 +2,10 @@ import React from "react";
 import {createRoot} from "react-dom/client";
 import "normalize.css";
 
-import {DebuggingView} from "./components/DebuggingView";
 import {ResearchSimulatorView} from "./components/ResearchSimulatorView";
 import {TechTreeView} from "./components/TechTreeView";
+import {DebuggingView} from "./components/DebuggingView";
+import {DebuggingView2} from "./components/DebuggingView2";
 
 import {
     readCoreData,
@@ -14,7 +15,10 @@ import {
 import "./index.css";
 
 
-type AppView = "debugging" | "research-simulator" | "tech-tree";
+type AppView = "research-simulator"
+             | "tech-tree"
+             | "debugging"
+             | "debugging2";
 
 interface State {
     coreData: null | CoreData;
@@ -26,7 +30,8 @@ class App extends React.Component<{}, State> {
         super(props);
         this.state = {
             coreData: null,
-            view: "tech-tree",
+            //view: "tech-tree",
+            view: "debugging2",
         };
     }
 
@@ -41,25 +46,28 @@ class App extends React.Component<{}, State> {
 
     override render() {
         return <>
-            <h1>Prototype Allegiance Core Explorer</h1>
+            <h1>Allegiance Core Explorer</h1>
             <p><input type="file" onChange={(e) => this._onUpload(e)} /></p>
             <p>
                 <select value={this.state.view} onChange={(e) => this._onViewChange(e)}>
                     <option value="research-simulator">Research Simulator View</option>
                     <option value="tech-tree">Tech Tree View</option>
-                    <option value="debugging">Debugging View</option>
+                    <option value="debugging">Debugging View 1</option>
+                    <option value="debugging2">Debugging View 2</option>
                 </select>
             </p>
             <hr />
             {(()=>{
                 if (!this.state.coreData) return "Nothing loaded";
                 switch (this.state.view) {
-                    case "debugging":
-                        return <DebuggingView coreData={this.state.coreData} />;
                     case "research-simulator":
                         return <ResearchSimulatorView coreData={this.state.coreData} />;
                     case "tech-tree":
                         return <TechTreeView coreData={this.state.coreData} />;
+                    case "debugging":
+                        return <DebuggingView coreData={this.state.coreData} />;
+                    case "debugging2":
+                        return <DebuggingView2 coreData={this.state.coreData} />;
                     default:
                         throw new Error("Unexpected view name.");
                 }
@@ -94,7 +102,12 @@ class App extends React.Component<{}, State> {
 
     private async _onViewChange(e: React.ChangeEvent<HTMLSelectElement>): Promise<void> {
         const newVal: string = e.target.value;
-        if (newVal !== "debugging" && newVal !== "research-simulator" && newVal !== "tech-tree") {
+        if (
+            newVal !== "research-simulator"
+            && newVal !== "tech-tree"
+            && newVal !== "debugging"
+            && newVal !== "debugging2"
+        ) {
             throw new Error("Unexpected view name.");
         }
 

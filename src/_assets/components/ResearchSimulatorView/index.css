@@ -12,11 +12,14 @@
     border: thin solid;
     padding: 0.5em;
     width: 16em;
+    min-width: 14em;
 }
 
 .research-simulator-view--research-menu--item {
     border: thin solid;
     padding: 0.3em;
+
+    cursor: pointer;
 }
 .research-simulator-view--research-menu--item.active {
     background-color: #aaffaa;

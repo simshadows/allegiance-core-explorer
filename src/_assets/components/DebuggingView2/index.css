@@ -1,0 +1,12 @@
+table.debugging-view-2,
+table.debugging-view-2 th,
+table.debugging-view-2 td {
+    border: thin solid;
+    /* border-collapse: collapse; */
+}
+
+table.debugging-view-2 > tbody > tr > td:nth-child(2) {
+    display: flex;
+    flex-direction: column;
+}
+

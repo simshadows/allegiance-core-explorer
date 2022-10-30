@@ -122,6 +122,45 @@ export function getReachableBuyables(
 
 /*** ***/
 
+export interface Providers {
+    stationTypes: Map<number, StationTypeData>; // Station type ID --> Data obj
+    developments: Map<number, DevelopmentData>; // Development ID --> Data obj
+}
+
+export function getProviders(
+    stationTypes: Map<number, StationTypeData>,
+    devels:       Map<number, DevelopmentData>,
+): Map<number, Providers> { // Bitmask index --> things that provide this index
+    const ret: Map<number, Providers> = new Map();
+
+    const getIndex = (x: number) => {
+        const p = ret.get(x);
+        if (p) return p;
+        const pp = {
+            stationTypes: new Map(),
+            developments: new Map(),
+        };
+        ret.set(x, pp);
+        return pp;
+    };
+
+    for (const stationTypeData of stationTypes.values()) {
+        for (const i of stationTypeData.techEffects) {
+            const p: Providers = getIndex(i);
+            p.stationTypes.set(stationTypeData.stationTypeID, stationTypeData);
+        }
+    }
+    for (const devData of devels.values()) {
+        for (const i of devData.techEffects) {
+            const p: Providers = getIndex(i);
+            p.developments.set(devData.devID, devData);
+        }
+    }
+    return ret;
+}
+
+/*** ***/
+
 //// Civilization ID to its reachables
 //export type AllReachableBuyables = Map<number, ReachableBuyables>;
 //

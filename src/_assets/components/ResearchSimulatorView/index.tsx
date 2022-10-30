@@ -186,7 +186,7 @@ export class ResearchSimulatorView extends React.Component<Props, State> {
                 />
             </div>
             <hr />
-            <h2>Current Tech Bitvalues</h2>
+            <h2>Current Tech Bitmask</h2>
             <p>{numSetToHumanReadable(this._getTechResearched())}</p>
         </>;
     }
