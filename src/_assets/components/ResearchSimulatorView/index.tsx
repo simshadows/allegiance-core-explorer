@@ -45,7 +45,7 @@ function ConstructionMenu(props: ConstructionMenuProps) {
                     onClick={() => props.onStationTypeToggle(d.stationTypeID)}
                 >
                     {d.name}&nbsp;
-                    <span className="research-simulator-view--research-menu--id">({d.stationTypeID})</span>
+                    <span className="common--research-menu--id">({d.stationTypeID})</span>
                 </div>
             )
         }
@@ -82,7 +82,7 @@ function ResearchMenu(props: ResearchMenuProps) {
                     onClick={() => props.onToggleDevel(d.devID)}
                 >
                     {d.name}&nbsp;
-                    <span className="research-simulator-view--research-menu--id">({d.devID})</span>
+                    <span className="common--research-menu--id">({d.devID})</span>
                 </div>
             )
         }

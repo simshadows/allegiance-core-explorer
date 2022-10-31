@@ -45,12 +45,14 @@ export class DebuggingView2 extends React.Component<Props, State> {
     override render() {
         const civData = this.props.coreData.civilizations.get(this.state.civID);
         if (!civData) throw new Error("Unexpected undefined value.");
+        const startingStationData = this.props.coreData.stationTypes.get(civData.initialStationTypeID);
+        if (!startingStationData) throw new Error("Unexpected undefined value.");
         const reachables = getReachableBuyables(this.props.coreData, civData);
         const providers = getProviders(reachables.stationTypes, reachables.developments);
         const dependencies = getAllDependencies(
             reachables.stationTypes,
             reachables.developments,
-            civData.baseTechs,
+            new Set([...civData.baseTechs, ...startingStationData.techEffects, ...startingStationData.localTech]),
             providers,
         );
         console.log(analyzeTechTreeDependencies(reachables));
@@ -63,6 +65,9 @@ export class DebuggingView2 extends React.Component<Props, State> {
                     civilizationsMap={this.props.coreData.civilizations}
                     onChange={(e) => this._onFactionChange(e)}
                 />
+            </p>
+            <p>
+                <em>Note: We are assuming all types of tech bases are allowed, and we will ignore the starting base.</em>
             </p>
             <h2>Providers</h2>
             <ProviderDisplay

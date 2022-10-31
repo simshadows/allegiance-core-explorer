@@ -28,14 +28,16 @@ function renderProvider(bitIndex: number, providers: Providers) {
             {
                 Array.from(providers.stationTypes.values()).map(x =>
                     <span key={`st${x.stationTypeID}`}><span className="debugging-view-2--type">Station: </span>
-                        {x.name}
+                        {x.name}&nbsp;
+                        <span className="common--research-menu--id">({x.stationTypeID})</span>
                     </span>
                 )
             }
             {
                 Array.from(providers.developments.values()).map(x =>
                     <span key={`st${x.devID}`}><span className="debugging-view-2--type">Devel: </span>
-                        {x.name}
+                        {x.name}&nbsp;
+                        <span className="common--research-menu--id">({x.devID})</span>
                     </span>
                 )
             }

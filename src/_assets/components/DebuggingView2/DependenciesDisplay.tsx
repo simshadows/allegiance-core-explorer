@@ -14,9 +14,9 @@ import {
 
 /*** ***/
 
-//function numSetToHumanReadable(obj: Set<number>) {
-//    return Array.from(obj).join(", ");
-//}
+function numSetToHumanReadable(obj: Set<number>) {
+    return Array.from(obj).join(", ");
+}
 
 //function renderAttribute(name: string, obj: any) {
 //    return <li><span className="attribute-name">{name}:</span> {String(obj)}</li>;
@@ -41,6 +41,7 @@ function renderDependencies({obj, deps}: {obj: Buyable; deps: Dependencies;}) {
                 )
             }
         </td>
+        <td>{numSetToHumanReadable(deps.requiredTechFiltered)}</td>
     </tr>;
 }
 
@@ -60,6 +61,7 @@ export function DependenciesDisplay(props: Props) {
                 <tr>
                     <th>Name</th>
                     <th>Depends on</th>
+                    <th>Bitmask (Filtered)</th>
                 </tr>
             </thead>
             <tbody>

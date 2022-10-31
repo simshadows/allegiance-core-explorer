@@ -5,3 +5,9 @@ body {
 .attribute-name {
     font-weight: bold;
 }
+
+span.common--research-menu--id {
+    font-weight: bold;
+    color: blue;
+}
+
