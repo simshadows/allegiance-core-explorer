@@ -1,6 +1,9 @@
 import React from "react";
 import ReactECharts from "echarts-for-react";
 
+import {parseJSON} from "@msagl/parser";
+import {Renderer} from "@msagl/renderer";
+
 import {
     type CoreData,
     //type CivilizationData,
@@ -38,6 +41,25 @@ export class TechTreeView extends React.Component<Props, State> {
         };
     }
 
+    override async componentDidMount() {
+        const graph = parseJSON({
+            nodes: [{id: 'kspacey'}, {id: 'swilliams'}, {id: 'kbacon'}, {id: 'bpitt'}, {id: 'hford'}, {id: 'lwilson'}],
+            edges: [
+                {source: 'kspacey', target: 'swilliams'},
+                {source: 'swilliams', target: 'kbacon'},
+                {source: 'bpitt', target: 'kbacon'},
+                {source: 'hford', target: 'lwilson'},
+                {source: 'lwilson', target: 'kbacon'},
+            ],
+        })
+        console.log(graph);
+
+        const elem = document.querySelector("#tech-tree-view--msagl-container");
+        if (!elem) throw new Error("Expected an element.");
+        const renderer = new Renderer(elem as HTMLElement);
+        console.log(renderer);
+    }
+
     override render() {
         console.log(this.props);
 
@@ -49,6 +71,7 @@ export class TechTreeView extends React.Component<Props, State> {
                     onChange={(e) => this._onFactionChange(e)}
                 />
             </p>
+            <div id="tech-tree-view--msagl-container"></div>
             <ReactECharts option={this._getEChartsOption()} />
         </>;
     }
