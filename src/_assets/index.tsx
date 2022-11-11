@@ -31,17 +31,17 @@ class App extends React.Component<{}, State> {
         this.state = {
             coreData: null,
             //view: "tech-tree",
-            view: "debugging2",
+            view: "tech-tree",
         };
     }
 
     override async componentDidMount() {
-        const res = await fetch("/ac_07.igc");
+        const res = await fetch("/ac_08.igc");
         if (!res.ok) return;
         this.setState({
             coreData: await readCoreData(await res.arrayBuffer()),
         });
-        console.log("Successfully loaded '/ac_07.igc' from the server.");
+        console.log("Successfully loaded '/ac_08.igc' from the server.");
     }
 
     override render() {
