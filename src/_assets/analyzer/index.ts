@@ -195,9 +195,15 @@ export function getDependencies(
 
 /*** ***/
 
+export interface _AllDependencies<T> {
+    obj: T;
+    deps: Dependencies;
+    numDependedBy: number;
+}
+
 export interface AllDependencies {
-    stationTypes: Map<number, {obj: StationTypeData; deps: Dependencies;}>; // Station type ID --> Data obj
-    developments: Map<number, {obj: DevelopmentData; deps: Dependencies;}>; // Development ID --> Data obj
+    stationTypes: Map<number, _AllDependencies<StationTypeData>>; // Station type ID --> Data obj
+    developments: Map<number, _AllDependencies<DevelopmentData>>; // Development ID --> Data obj
 }
 
 export function getAllDependencies(
@@ -206,37 +212,61 @@ export function getAllDependencies(
     techToIgnore: Set<number>,
     providersMap: Map<number, Providers>,
 ): AllDependencies {
-    const deps: AllDependencies = {
+    const allDeps: AllDependencies = {
         stationTypes: new Map(),
         developments: new Map(),
     };
+    const depsToCount: Dependencies[] = []
+
     for (const stationTypeData of stationTypes.values()) {
-        deps.stationTypes.set(
+        const deps = getDependencies(
+            stationTypeData.techRequired,
+            techToIgnore,
+            providersMap,
+        );
+        depsToCount.push(deps);
+
+        allDeps.stationTypes.set(
             stationTypeData.stationTypeID,
             {
                 obj: stationTypeData,
-                deps: getDependencies(
-                    stationTypeData.techRequired,
-                    techToIgnore,
-                    providersMap,
-                ),
+                deps,
+                numDependedBy: 0,
             },
         );
     }
     for (const devData of devels.values()) {
-        deps.developments.set(
+        const deps = getDependencies(
+            devData.techRequired,
+            techToIgnore,
+            providersMap,
+        );
+        depsToCount.push(deps);
+
+        allDeps.developments.set(
             devData.devID,
             {
                 obj: devData,
-                deps: getDependencies(
-                    devData.techRequired,
-                    techToIgnore,
-                    providersMap,
-                ),
+                deps,
+                numDependedBy: 0,
             },
         );
     }
-    return deps;
+
+    for (const deps of depsToCount) {
+        for (const d of deps.stationTypes.values()) {
+            const obj = allDeps.stationTypes.get(d.stationTypeID);
+            if (!obj) throw new Error("Unexpected undefined.");
+            ++obj.numDependedBy;
+        }
+        for (const d of deps.developments.values()) {
+            const obj = allDeps.developments.get(d.devID);
+            if (!obj) throw new Error("Unexpected undefined.");
+            ++obj.numDependedBy;
+        }
+    }
+
+    return allDeps;
 }
 
 /*** ***/

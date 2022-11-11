@@ -15,7 +15,10 @@ import {
 
 import {CivilizationSelector} from "../common/CivilizationSelector";
 
-import {compileGraphPrerender} from "./compileGraphPrerender";
+import {
+    type GraphNode,
+    compileGraphPrerender,
+} from "./compileGraphPrerender";
 
 import "./index.css";
 
@@ -92,7 +95,7 @@ export class TechTreeView extends React.Component<Props, State> {
     }
 
     override render() {
-        console.log(this.props);
+        //console.log(this.props);
 
         return <>
             <p>
@@ -117,18 +120,27 @@ export class TechTreeView extends React.Component<Props, State> {
         if (!civData) throw new Error("Unexpected undefined value.");
 
         const graphPrerenderData = compileGraphPrerender(this.props.coreData, civData);
+        console.log(graphPrerenderData);
 
         const data: DataElem[] = [];
-        let currY = 0;
-        for (const nodeData of graphPrerenderData.nodes) {
+        function addData(node: GraphNode, x: number, y: number): {nextLowY: number;} {
             data.push({
-                id: nodeData.id,
-                name: nodeData.name,
-                x: currY,
-                y: currY,
+                id: node.id,
+                name: node.name,
+                x: x * 120,
+                y: y * 10,
             });
-            currY += 10;
+            if (node.children.length === 0) {
+                ++y;
+            } else {
+                for (const child of node.children) {
+                    const result = addData(child, x + 1, y);
+                    y = result.nextLowY;
+                }
+            }
+            return {nextLowY: y};
         }
+        const addDataFinalResult = addData(graphPrerenderData.tree, 0, 0);
 
         return {
             //title: {
@@ -142,19 +154,22 @@ export class TechTreeView extends React.Component<Props, State> {
                     type: "graph",
                     layout: "none",
                     symbol: "rect",
-                    symbolSize: [60, 10],
-                    height: currY,
+                    symbolSize: [80, 10],
+                    height: addDataFinalResult.nextLowY * 10,
+                    width: graphPrerenderData.hints.treeDepth * 150,
                     zoom: 5,
+                    center: [0, 0],
                     roam: true,
                     label: {
                         show: true
                     },
                     edgeSymbol: ["circle", "arrow"],
-                    edgeSymbolSize: [4, 10],
+                    edgeSymbolSize: [4, 20],
                     edgeLabel: {
                         fontSize: 20
                     },
                     data: data,
+                    links: graphPrerenderData.links,
                     // links: [],
                     //links: [
                     //    {
@@ -197,8 +212,8 @@ export class TechTreeView extends React.Component<Props, State> {
                     //    }
                     //],
                     lineStyle: {
-                        opacity: 0.9,
-                        width: 2,
+                        opacity: 1,
+                        width: 5,
                         curveness: 0
                     }
                 }
